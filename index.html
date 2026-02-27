@@ -1,486 +1,196 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>운전면허시험장 민원 안내(데모)</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif;margin:0;background:#f6f7fb;color:#111;font-size:16px}
-    header{padding:18px 16px;background:#fff;border-bottom:1px solid #e9e9ef}
-    h1{font-size:18px;margin:0}
-    .wrap{max-width:820px;margin:0 auto;padding:16px}
-    .card{background:#fff;border:1px solid #e9e9ef;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 1px 0 rgba(0,0,0,.02)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-    button{width:100%;border:1px solid #e5e5ee;background:#fff;border-radius:12px;padding:12px 10px;font-size:15px;cursor:pointer}
-    button:hover{background:#f2f4ff}
-    .pill{display:inline-block;background:#eef2ff;border:1px solid #dfe6ff;color:#1f3fff;padding:4px 10px;border-radius:999px;font-size:12px}
-    .muted{color:#5a5f6a;font-size:13px;line-height:1.5}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > div{flex:1;min-width:220px}
-    textarea,input{width:100%;font-size:15px;border:1px solid #e5e5ee;border-radius:12px;padding:10px;box-sizing:border-box}
-    details summary{cursor:pointer}
-    .k{font-weight:700}
-    .footer{margin-top:24px;color:#707584;font-size:12px;text-align:center}
-    .small{font-size:12px}
-    .tag{display:inline-block;border:1px solid #e5e5ee;border-radius:999px;padding:3px 8px;font-size:12px;margin-right:6px;margin-top:6px}
-    .ok{background:#f3fff6;border-color:#d7ffe3}
-    .danger{background:#fff5f5;border-color:#ffd5d5}
-    .navrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .navrow button{flex:1;min-width:160px}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>운전면허시험장 민원 안내</title>
+
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0}
+.wrap{max-width:820px;margin:auto;padding:16px}
+.card{background:white;padding:16px;border-radius:14px;margin:12px 0}
+button{width:100%;padding:12px;margin-top:8px;border-radius:10px;border:1px solid #ddd;background:#fff}
+.k{font-weight:bold}
+.green{color:#008a2e;font-weight:bold}
+.orange{color:#cc7a00;font-weight:bold}
+.red{color:#c00000;font-weight:bold}
+</style>
 </head>
+
 <body>
-<header>
-  <div class="wrap">
-    <h1>운전면허시험장 민원 안내 <span class="pill">QR 데모</span></h1>
-    <div class="muted">앱 설치 없이, QR로 접속해 반복 질문(준비물/수수료/어디로 가요/지금 되나요)을 빠르게 해결하는 시범 페이지입니다.</div>
-  </div>
-</header>
-
 <div class="wrap">
-  <div class="card">
-    <div class="row">
-      <div>
-        <div class="k">업무를 선택하세요</div>
-        <div class="muted small">※ 내용은 데모 문구입니다. 기관 기준 안내로 교체해 사용하세요.</div>
-      </div>
-      <div>
-        <span class="tag ok">고령자 모드</span>
-        <span class="tag">외국어(추후)</span>
-        <span class="tag">통계(반자동)</span>
-      </div>
-    </div>
 
-    <div class="grid" style="margin-top:10px">
-      <button onclick="openTopic('reissue')">면허 재발급(분실/훼손)</button>
+<div class="card">
+<h3>업무 선택</h3>
+<button onclick="openWizard('fitness')">적성검사</button>
+</div>
 
-      <!-- ✅ 갱신은 단계형 질문(wizard) -->
-      <button onclick="openWizard('renewal')">면허 갱신</button>
+<div id="content"></div>
 
-      <button onclick="openWizard('fitness')">적성검사(고령자 포함)</button>
-      <button onclick="openWizard('exchange')">외국면허 교환</button>
-
-      <button onclick="openTopic('fee')">수수료/결제 안내</button>
-      <button onclick="openTopic('where')">어디로 가요? (창구/동선)</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="k">빠른 질문(자유 입력) <span class="pill">간단 AI</span></div>
-    <div class="muted">자주 묻는 질문을 키워드로 분류해 안내를 띄우는 ‘가벼운 AI’ 데모입니다(개인정보 입력 금지).</div>
-    <div style="margin-top:10px">
-      <input id="q" placeholder="예: 면허 분실했는데 뭐 가져가요? / 갱신 수수료 얼마예요? / 어디 창구로 가요?" />
-      <div class="row" style="margin-top:10px">
-        <div><button onclick="answer()">답변 보기</button></div>
-        <div><button onclick="toggleSenior()">고령자 모드(큰 글씨)</button></div>
-      </div>
-      <div id="ans" class="card" style="display:none;margin-top:12px"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <details>
-      <summary><span class="k">직원용: 반복 질문 기록(로컬 저장)</span> <span class="pill">통계</span></summary>
-      <div class="muted">민원인이 많이 묻는 질문을 간단히 기록해두면, 내부 개선(안내문/배치/QR 위치)에 활용할 수 있습니다. 이 데모는 브라우저에만 저장됩니다.</div>
-      <div style="margin-top:10px">
-        <textarea id="logText" rows="3" placeholder="예: 재발급 준비물 문의 / 갱신 대상 여부 문의"></textarea>
-        <div class="row" style="margin-top:10px">
-          <div><button onclick="saveLog()">기록 저장</button></div>
-          <div><button onclick="showStats()">간단 통계 보기</button></div>
-        </div>
-        <div id="stats" class="muted" style="margin-top:10px"></div>
-      </div>
-    </details>
-  </div>
-
-  <div class="footer">Demo v2 · 개인정보 입력 없이 사용 · 기관 안내로 문구 교체 후 배포</div>
 </div>
 
 <script>
-/* ====== 1) 단일 안내(바로 안내) ====== */
-const TOPICS = {
-  reissue: {
-    title: "면허 재발급(분실/훼손)",
-    bullets: [
-      "준비물: 신분증(예: 주민등록증/여권 등), 사진 필요 여부는 센터 기준 확인",
-      "수수료: 센터 기준 금액 안내(예: 카드/현금 가능 여부 포함)",
-      "처리: 당일 처리 여부 및 소요시간 안내",
-      "주의: 본인 방문 원칙, 대리 신청 가능 조건은 센터 기준 확인"
-    ]
-  },
-  fee: {
-    title: "수수료/결제 안내",
-    bullets: [
-      "업무별 수수료 표를 한 눈에(재발급/갱신/적성검사 등) — 센터 기준으로 교체",
-      "결제 수단: 카드/현금/계좌이체 가능 여부 — 센터 기준",
-      "영수증/현금영수증 안내"
-    ]
-  },
-  where: {
-    title: "어디로 가요? (창구/동선)",
-    bullets: [
-      "업무별 창구 번호/층 안내(현장 표지판과 일치시키기)",
-      "대기표 발권 위치 및 순서",
-      "사진촬영/검사실 위치(해당 시)",
-      "혼잡 시 대체 창구/안내 데스크 위치"
-    ]
-  }
-};
 
-function openTopic(key){
-  const t = TOPICS[key];
-  const el = document.getElementById('ans');
-  el.style.display='block';
-  el.innerHTML = `
-    <div class="k">${t.title}</div>
-    <ul>${t.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
-    <div class="navrow">
-      <button onclick="goHome()">처음 화면</button>
-    </div>
-    <div class="muted small" style="margin-top:10px">※ 센터 기준 문구로 교체 후 사용하세요.</div>
-  `;
-  bumpCounter(key);
+const WIZARDS = {
+
+fitness:{
+title:"적성검사 안내",
+steps:[
+
+{
+id:"age",
+q:"연령대를 선택해주세요",
+options:[
+{label:"20~64세",value:"normal"},
+{label:"65~74세",value:"mid"},
+{label:"75세 이상",value:"senior"}
+]
+},
+
+{
+id:"period",
+q:"적성검사 기간이 지났나요?",
+options:[
+{label:"기간 내",value:"in"},
+{label:"6개월 이내 경과",value:"late"},
+{label:"6개월 초과 경과",value:"over"},
+{label:"모르겠음",value:"unknown"}
+]
+},
+
+{
+id:"photo",
+q:"6개월 이내 촬영한 사진이 있나요?",
+options:[
+{label:"있음",value:"yes"},
+{label:"없음",value:"no"},
+{label:"모르겠음",value:"unknown"}
+]
+},
+
+{
+id:"vision",
+q:"시력검사를 받으셨나요?",
+options:[
+{label:"완료",value:"done"},
+{label:"미실시",value:"no"},
+{label:"모르겠음",value:"unknown"}
+]
+},
+
+{
+id:"license",
+q:"면허증을 소지하고 계신가요?",
+options:[
+{label:"있음",value:"yes"},
+{label:"분실",value:"lost"},
+{label:"모르겠음",value:"unknown"}
+]
 }
 
-/* ====== 2) 단계형 질문(wizard) ====== */
-/*  - 유경님 요청: 갱신은 (연령대/기간 지남/시력검사/예약/사진 여부/대리 가능 여부) 등 단계로 진행
-    - 개인정보 최소화를 위해 '몇년생' 직접 입력 대신 '연령대 선택'으로 구성 */
-const WIZARDS = {
-  renewal: {
-    title: "면허 갱신",
-    steps: [
-      {
-        id: "age",
-        q: "1) 연령대(또는 출생연도 범위)를 선택해주세요",
-        options: [
-          { label: "20~40대(예: 1986~2005년생)", value: "20-40" },
-          { label: "50~64세(예: 1962~1976년생)", value: "50-64" },
-          { label: "65세 이상(예: 1961년생 이전)", value: "65+" }
-        ]
-      },
-      {
-        id: "expired",
-        q: "2) 갱신 기간이 지났나요?",
-        options: [
-          { label: "아니요(기간 내)", value: "no" },
-          { label: "네(기간 지남)", value: "yes" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      },
-      {
-        id: "vision",
-        q: "3) 최근 시력검사(해당 시) 기록이 있나요?",
-        options: [
-          { label: "네(있어요)", value: "yes" },
-          { label: "아니요(없어요)", value: "no" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      },
-      {
-        id: "photo",
-        q: "4) 사진(또는 사진 제출 방식)이 준비되어 있나요?",
-        options: [
-          { label: "네(준비됨)", value: "yes" },
-          { label: "아니요(없음)", value: "no" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      },
-      {
-        id: "reserve",
-        q: "5) 예약(온라인/전화 등)이 필요한 업무인가요? 예약을 해두셨나요?",
-        options: [
-          { label: "예약 불필요/이미 확인함", value: "ok" },
-          { label: "예약했어요", value: "yes" },
-          { label: "예약 안 했어요/모름", value: "no" }
-        ]
-      },
-      {
-        id: "proxy",
-        q: "6) 본인 방문인가요? (대리 신청 여부)",
-        options: [
-          { label: "본인 방문", value: "self" },
-          { label: "대리 신청(가족 등)", value: "proxy" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      }
-    ],
-    result: (a) => {
-      const lines = [];
-      lines.push("✅ 아래 안내는 데모입니다. 실제 기준(대상/기간/검사/예약/대리)을 센터 안내로 교체하세요.");
+],
 
-      // 연령대
-      if (a.age === "65+") lines.push("• 연령대: 65세 이상은 추가 확인(고령자 관련) 필요 가능(센터 기준).");
-      else lines.push("• 연령대: 일반 갱신 절차를 우선 안내합니다(센터 기준).");
+result:(a)=>{
 
-      // 기간
-      if (a.expired === "yes") lines.push("• 기간 경과: 추가 절차/서류가 필요할 수 있습니다(센터 기준).");
-      else if (a.expired === "unknown") lines.push("• 기간 확인: 조회 방법/확인 경로를 안내합니다(센터 기준 링크 또는 문의).");
-      else lines.push("• 기간 내: 일반 접수 절차로 진행 가능(센터 기준).");
+let lines=[];
 
-      // 시력검사
-      if (a.vision === "yes") lines.push("• 시력검사: 기록 인정/유효기간은 센터 기준 확인.");
-      else if (a.vision === "no") lines.push("• 시력검사: 현장 검사 또는 지정 방식 안내(센터 기준).");
-      else lines.push("• 시력검사: 필요 여부/방법을 센터 기준으로 안내.");
+/* 사진 중심 로직 */
 
-      // 사진
-      if (a.photo === "no") lines.push("• 사진: 현장 촬영/제출 방식(규격 포함)을 안내합니다(센터 기준).");
+if(a.photo==="no"){
+lines.push("<span class='red'>🔴 사진이 없습니다.</span>");
+lines.push("6개월 이내 3.5×4.5cm 흰색 배경 여권용 사진이 필요합니다.");
+lines.push("📍 1층 B동 신체검사실 옆 즉석사진기에서 촬영 가능합니다.");
+lines.push("📸 사진 촬영 후 번호표 발권을 권장합니다.");
+}
+else if(a.photo==="unknown"){
+lines.push("<span class='orange'>🟡 사진 규격 확인이 필요합니다.</span>");
+lines.push("사진 규격: 3.5×4.5cm / 흰색 배경 / 여권용");
+lines.push("📍 규격이 맞지 않으면 1층 B동 신체검사실 옆에서 촬영 가능");
+}
+else{
+lines.push("<span class='green'>🟢 사진 준비 완료</span>");
+}
 
-      // 예약
-      if (a.reserve === "no") lines.push("• 예약: 예약 필요 업무일 수 있으니 방문 전 예약/가능여부를 확인하세요(센터 기준).");
+/* 기간 경과 */
 
-      // 대리
-      if (a.proxy === "proxy") lines.push("• 대리 신청: 가능 조건/위임장/가족관계 서류 등 센터 기준 확인.");
+if(a.period==="over"){
+lines.push("<span class='red'>⚠ 기간 6개월 초과 경과</span>");
+}
+else if(a.period==="late"){
+lines.push("<span class='orange'>⚠ 기간 경과 상태</span>");
+}
 
-      lines.push("");
-      lines.push("📌 준비물(예시): 신분증 / 사진(해당 시) / 추가 서류(해당 시)");
-      lines.push("💳 수수료: 센터 기준");
-      lines.push("🏢 창구/동선: '어디로 가요?(창구/동선)' 메뉴 참고");
+/* 시력 */
 
-      return lines;
-    }
-  },
+if(a.vision==="no"){
+lines.push("👁 시력검사 필요 여부 확인 권장");
+}
 
-  fitness: {
-    title: "적성검사(고령자 포함)",
-    steps: [
-      {
-        id: "age",
-        q: "1) 연령대(또는 출생연도 범위)를 선택해주세요",
-        options: [
-          { label: "일반(예: 64세 이하)", value: "general" },
-          { label: "고령(예: 65세 이상)", value: "senior" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      },
-      {
-        id: "reservation",
-        q: "2) 예약이 필요한 절차인가요? 예약하셨나요?",
-        options: [
-          { label: "예약 불필요/확인함", value: "ok" },
-          { label: "예약했어요", value: "yes" },
-          { label: "예약 안 했어요/모름", value: "no" }
-        ]
-      },
-      {
-        id: "docs",
-        q: "3) 준비물(신분증 등)을 가지고 오셨나요?",
-        options: [
-          { label: "네", value: "yes" },
-          { label: "아니요", value: "no" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      }
-    ],
-    result: (a) => {
-      const lines = [];
-      lines.push("✅ 데모 안내입니다. 실제 적성검사 기준/주기/교육/검사는 센터 안내로 교체하세요.");
-      if (a.age === "senior") lines.push("• 고령 대상: 추가 절차(교육/검사 등)가 있을 수 있습니다(센터 기준).");
-      if (a.reservation === "no") lines.push("• 예약: 필요 여부를 확인하세요(센터 기준).");
-      if (a.docs === "no") lines.push("• 준비물: 신분증 등 필수 준비물을 확인 후 재방문 권장(센터 기준).");
-      lines.push("");
-      lines.push("📌 준비물(예시): 신분증 / 검사 관련 서류(해당 시)");
-      lines.push("💳 수수료: 센터 기준");
-      lines.push("🏢 창구/동선: '어디로 가요?(창구/동선)' 메뉴 참고");
-      return lines;
-    }
-  },
+/* 면허증 */
 
-  exchange: {
-    title: "외국면허 교환",
-    steps: [
-      {
-        id: "country",
-        q: "1) 면허 발급 국가 요건이 확인되었나요?",
-        options: [
-          { label: "네(요건 확인)", value: "yes" },
-          { label: "아니요(모름)", value: "no" },
-          { label: "국가별 링크 필요", value: "link" }
-        ]
-      },
-      {
-        id: "docs",
-        q: "2) 서류(여권/외국면허/출입국 서류 등)가 준비되어 있나요?",
-        options: [
-          { label: "네", value: "yes" },
-          { label: "아니요", value: "no" },
-          { label: "모르겠어요", value: "unknown" }
-        ]
-      },
-      {
-        id: "translation",
-        q: "3) 번역/공증(해당 시) 준비가 되어 있나요?",
-        options: [
-          { label: "네", value: "yes" },
-          { label: "아니요/모름", value: "no" }
-        ]
-      }
-    ],
-    result: (a) => {
-      const lines = [];
-      lines.push("✅ 데모 안내입니다. 국가별 요건/서류/공증 기준은 센터 안내로 교체하세요.");
-      if (a.country !== "yes") lines.push("• 국가 요건: 국가별 상이하므로 ‘국가별 안내 링크/창구’로 연결 권장.");
-      if (a.docs === "no") lines.push("• 서류: 여권/외국면허/출입국 서류 등 필수 서류 확인 필요(센터 기준).");
-      if (a.translation === "no") lines.push("• 번역/공증: 필요 여부 및 인정 범위 센터 기준 확인.");
-      lines.push("");
-      lines.push("📌 준비물(예시): 여권/외국면허/출입국 서류/번역·공증(해당 시)");
-      lines.push("💳 수수료/처리기간: 센터 기준");
-      lines.push("🏢 창구/동선: '어디로 가요?(창구/동선)' 메뉴 참고");
-      return lines;
-    }
-  }
+if(a.license==="lost"){
+lines.push("📌 면허증 분실 시 재발급 절차 병행 가능");
+}
+
+lines.push("<hr>");
+lines.push("📋 준비물: 신분증 / 면허증(있는 경우) / 사진(6개월 이내)");
+lines.push("🎫 발권기 선택: 적성검사");
+
+return lines;
+
+}
+
+}
+
 };
 
-let wizardState = null;
+let wizardState=null;
 
 function openWizard(key){
-  const w = WIZARDS[key];
-  if (!w) return;
-
-  wizardState = { key, stepIndex: 0, answers: {} };
-  renderWizardStep();
-  bumpCounter(key);
+wizardState={key:key,step:0,answers:{}};
+renderStep();
 }
 
-function renderWizardStep(){
-  const w = WIZARDS[wizardState.key];
-  const step = w.steps[wizardState.stepIndex];
+function renderStep(){
+let w=WIZARDS[wizardState.key];
+let step=w.steps[wizardState.step];
 
-  const el = document.getElementById('ans');
-  el.style.display = 'block';
+let html="<div class='card'><div class='k'>"+w.title+"</div><p>"+step.q+"</p>";
 
-  const opts = step.options.map(o => `
-    <button onclick="chooseWizardOption('${step.id}','${o.value}')">${o.label}</button>
-  `).join('');
+step.options.forEach(o=>{
+html+="<button onclick=\"selectOption('"+step.id+"','"+o.value+"')\">"+o.label+"</button>";
+});
 
-  el.innerHTML = `
-    <div class="k">${w.title}</div>
-    <div class="muted" style="margin-top:6px">${step.q}</div>
-    <div class="grid" style="margin-top:10px">${opts}</div>
-    <div class="navrow">
-      <button onclick="goHome()">처음 화면</button>
-      ${wizardState.stepIndex>0 ? `<button onclick="wizardBack()">← 이전</button>` : ``}
-    </div>
-    <div class="muted small" style="margin-top:10px">※ 개인정보는 입력하지 마세요.</div>
-  `;
+html+="</div>";
+
+document.getElementById("content").innerHTML=html;
 }
 
-function chooseWizardOption(stepId, value){
-  wizardState.answers[stepId] = value;
+function selectOption(id,value){
+wizardState.answers[id]=value;
 
-  const w = WIZARDS[wizardState.key];
-  if (wizardState.stepIndex < w.steps.length - 1){
-    wizardState.stepIndex += 1;
-    renderWizardStep();
-  } else {
-    renderWizardResult();
-  }
+let w=WIZARDS[wizardState.key];
+
+if(wizardState.step<w.steps.length-1){
+wizardState.step++;
+renderStep();
+}else{
+showResult();
+}
 }
 
-function wizardBack(){
-  wizardState.stepIndex = Math.max(0, wizardState.stepIndex - 1);
-  renderWizardStep();
+function showResult(){
+let w=WIZARDS[wizardState.key];
+let lines=w.result(wizardState.answers);
+
+let html="<div class='card'><div class='k'>맞춤 안내 결과</div>";
+lines.forEach(l=>{html+="<p>"+l+"</p>";});
+html+="<button onclick='location.reload()'>처음으로</button></div>";
+
+document.getElementById("content").innerHTML=html;
 }
 
-function renderWizardResult(){
-  const w = WIZARDS[wizardState.key];
-  const lines = w.result(wizardState.answers);
-
-  const el = document.getElementById('ans');
-  el.style.display = 'block';
-  el.innerHTML = `
-    <div class="k">${w.title} · 맞춤 안내</div>
-    <ul>${lines.map(x=>`<li>${x}</li>`).join('')}</ul>
-    <div class="navrow">
-      <button onclick="openWizard('${wizardState.key}')">다시 선택하기</button>
-      <button onclick="goHome()">처음 화면</button>
-    </div>
-  `;
-}
-
-/* ====== 3) 고령자 모드(큰 글씨) ====== */
-function toggleSenior(){
-  const isSenior = document.body.classList.toggle('senior');
-  document.body.style.fontSize = isSenior ? '18px' : '16px';
-}
-
-/* ====== 4) 간단 AI(키워드 라우팅) ====== */
-function normalize(s){
-  return (s||"").toLowerCase().replace(/\s+/g,' ').trim();
-}
-
-function answer(){
-  const q = normalize(document.getElementById('q').value);
-  if(!q){ return; }
-
-  let key = null;
-  if(/분실|재발급|훼손/.test(q)) key='reissue';
-  else if(/갱신|기간|만료/.test(q)) key='renewal';
-  else if(/적성|고령|75|70/.test(q)) key='fitness';
-  else if(/외국|교환|여권|국가/.test(q)) key='exchange';
-  else if(/수수|결제|카드|현금|돈/.test(q)) key='fee';
-  else if(/어디|창구|위치|층|대기표/.test(q)) key='where';
-  else key='where';
-
-  // 갱신/적성/외국면허는 질문 단계로
-  if (key === 'renewal' || key === 'fitness' || key === 'exchange') openWizard(key);
-  else openTopic(key);
-
-  saveLogAuto(key, q);
-}
-
-/* ====== 5) 직원용 기록/통계(로컬) ====== */
-function bumpCounter(key){
-  const raw = localStorage.getItem('counters') || '{}';
-  const counters = JSON.parse(raw);
-  counters[key] = (counters[key]||0) + 1;
-  localStorage.setItem('counters', JSON.stringify(counters));
-}
-
-function saveLogAuto(key, q){
-  const item = {ts: new Date().toISOString(), key, q};
-  const raw = localStorage.getItem('logs') || '[]';
-  const logs = JSON.parse(raw);
-  logs.push(item);
-  localStorage.setItem('logs', JSON.stringify(logs));
-}
-
-function saveLog(){
-  const text = document.getElementById('logText').value.trim();
-  if(!text) return;
-  saveLogAuto('manual', text);
-  document.getElementById('logText').value='';
-  document.getElementById('stats').innerText='저장되었습니다.';
-}
-
-function showStats(){
-  const raw = localStorage.getItem('counters') || '{}';
-  const counters = JSON.parse(raw);
-  const entries = Object.entries(counters).sort((a,b)=>b[1]-a[1]);
-
-  if(entries.length===0){
-    document.getElementById('stats').innerText='아직 데이터가 없습니다.';
-    return;
-  }
-
-  const nameMap = {
-    reissue: "면허 재발급(분실/훼손)",
-    renewal: "면허 갱신",
-    fitness: "적성검사(고령자 포함)",
-    exchange: "외국면허 교환",
-    fee: "수수료/결제 안내",
-    where: "어디로 가요?(창구/동선)",
-    manual: "직원 수기 기록"
-  };
-
-  const lines = entries.map(([k,v]) => `• ${nameMap[k] || k}: ${v}회`).join('\n');
-  document.getElementById('stats').innerText = lines;
-}
-
-/* ====== 공통 ====== */
-function goHome(){
-  document.getElementById('ans').style.display='none';
-  document.getElementById('q').value='';
-}
 </script>
+
 </body>
 </html>
